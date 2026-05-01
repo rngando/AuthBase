@@ -55,6 +55,7 @@ env/
 
 # SQLite
 *.sqlite3
+*.sqlite
 *.db
 
 # IDEs and editors
