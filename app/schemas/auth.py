@@ -10,4 +10,4 @@ class LoginSchema(BaseModel):
 class RegisterSchema(BaseModel):
     name: str
     email: EmailStr
-    hashed_password: str
+    password: str

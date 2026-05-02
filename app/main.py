@@ -7,6 +7,7 @@ from app.db.session import engine
 from app.models.user import Users
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.users import router as users_router
 
 app = FastAPI(title="AuthBase API", version="1.0.0")
 
@@ -14,3 +15,4 @@ app = FastAPI(title="AuthBase API", version="1.0.0")
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
+app.include_router(users_router)
