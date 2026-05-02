@@ -54,7 +54,6 @@ env/
 .venv/
 
 # SQLite
-*.sqlite3
 *.sqlite
 *.db
 
