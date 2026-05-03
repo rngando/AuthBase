@@ -1,4 +1,4 @@
-# user.py
+# app/models/user.py
 
 from db.base import Base
 

@@ -8,6 +8,7 @@ from schemas.auth import LoginSchema, RegisterSchema
 from core.security import authenticate_user, create_access_token
 
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
 from werkzeug.security import generate_password_hash
 from fastapi import APIRouter, HTTPException, Depends
 
@@ -30,7 +31,8 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
     token = create_access_token(user.id)
-    return {"access_token": token}
+    # return {"access_token": token}
+    return JSONResponse(content={"access_token": token, "token_type": "bearer"}, status_code=200)
 
 
 @router.post("/register")
@@ -53,4 +55,5 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.id}
+    # return {"message": "User registered successfully", "user_id": new_user.id}
+    return JSONResponse(content={"message": "User registered successfully", "user_id": new_user.id}, status_code=201)

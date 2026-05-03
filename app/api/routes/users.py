@@ -8,6 +8,8 @@ from core.dependencies import get_current_user
 from schemas.user import UserResponse, UserUpdate
 
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+from werkzeug.security import generate_password_hash
 from fastapi import APIRouter, HTTPException, Depends
 
 
@@ -73,9 +75,13 @@ def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), c
     Retorna os dados atualizados do usuário.
     """
     user = db.query(Users).filter(Users.id == user_id).first()
+    existing = db.query(Users).filter(Users.email == data.email).first()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    if existing and existing.id != user_id:
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     # permissão
     if current_user.role != "admin" and current_user.id != user_id:
@@ -83,6 +89,17 @@ def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), c
 
     if data.name is not None:
         user.name = data.name
+    if data.email is not None:
+        user.email = data.email
+    if data.password is not None:
+        user.hashed_password = generate_password_hash(data.password)
+    if data.role and current_user.role != "admin":
+        raise HTTPException(403, "Not allowed to change role")
+    elif data.role:
+        role = ["admin", "user"]
+        if data.role not in role:
+            raise HTTPException(status_code=400, detail="Invalid role")
+        user.role = data.role
 
     db.commit()
     db.refresh(user)
@@ -92,6 +109,14 @@ def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), c
 # Deletar usuário
 @router.delete("/{user_id}", response_model=UserResponse)
 def delete_user(user_id: int, db: Session=Depends(get_db), current_user: Users = Depends(get_current_user)):
+    """ 
+    Deleta um usuário.
+    Apenas administradores ou o próprio usuário podem deletar.
+    - **user_id**: ID do usuário a ser deletado.
+    - **db**: Sessão do banco de dados.
+    - **current_user**: Usuário autenticado.
+    Retorna os dados do usuário deletado.
+    """
     user = db.query(Users).filter(Users.id == user_id).first()
 
     if not user:
@@ -105,5 +130,6 @@ def delete_user(user_id: int, db: Session=Depends(get_db), current_user: Users =
     db.delete(user)
     db.commit()
 
-# Upgrade importante (admin only)
+    # return user
+    return JSONResponse(content={"message": "User deleted successfully", "user_id": user_id}, status_code=200)
 
