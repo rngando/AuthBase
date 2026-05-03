@@ -1,11 +1,11 @@
 # app/api/routes/auth.py
 
-from app.db.base import Base
-from app.api.deps import get_db
-from app.models.user import Users
-from app.core.config import Config
-from app.schemas.auth import LoginSchema, RegisterSchema
-from app.core.security import authenticate_user, create_access_token
+from db.base import Base
+from api.deps import get_db
+from models.user import Users
+from core.config import Config
+from schemas.auth import LoginSchema, RegisterSchema
+from core.security import authenticate_user, create_access_token
 
 from sqlalchemy.orm import Session
 from werkzeug.security import generate_password_hash

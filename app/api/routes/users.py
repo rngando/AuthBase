@@ -1,11 +1,11 @@
 # app/api/users.py
 
-from app.db.base import Base
-from app.api.deps import get_db
-from app.models.user import Users
-from app.core.config import Config
-from app.core.dependencies import get_current_user
-from app.schemas.user import UserResponse, UserUpdate
+from db.base import Base
+from api.deps import get_db
+from models.user import Users
+from core.config import Config
+from core.dependencies import get_current_user
+from schemas.user import UserResponse, UserUpdate
 
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, HTTPException, Depends
@@ -59,12 +59,7 @@ def get_user(user_id: int, db: Session=Depends(get_db), current_user: Users = De
 
 # Atualizar usuário
 @router.put("/{user_id}", response_model=UserResponse)
-def update_user(
-    user_id: int,
-    data: UserUpdate,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
-):
+def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), current_user: Users = Depends(get_current_user)):
     """
     Atualiza os dados de um usuário.
 
@@ -95,5 +90,20 @@ def update_user(
     return user
 
 # Deletar usuário
+@router.delete("/{user_id}", response_model=UserResponse)
+def delete_user(user_id: int, db: Session=Depends(get_db), current_user: Users = Depends(get_current_user)):
+    user = db.query(Users).filter(Users.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Permissão
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    
+    # Deletar Usuário
+    db.delete(user)
+    db.commit()
+
 # Upgrade importante (admin only)
 

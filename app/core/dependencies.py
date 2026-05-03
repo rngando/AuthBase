@@ -1,7 +1,7 @@
 
-from app.api.deps import get_db
-from app.models.user import Users
-from app.core.config import Config
+from api.deps import get_db
+from models.user import Users
+from core.config import Config
 
 import jwt
 from sqlalchemy.orm import Session

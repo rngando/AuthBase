@@ -1,7 +1,7 @@
 # app/core/security.py
 
-from app.models.user import Users
-from app.core.config import Config
+from models.user import Users
+from core.config import Config
 from datetime import datetime, timedelta
 
 import jwt
