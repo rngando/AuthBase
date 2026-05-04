@@ -4,12 +4,12 @@ import os
 import uvicorn
 from fastapi import FastAPI
 
-from db.base import Base
-from db.session import engine
-from models.user import Users
+from app.db.base import Base
+from app.db.session import engine
+from app.models.user import Users
 
-from api.routes.auth import router as auth_router
-from api.routes.users import router as users_router
+from app.api.routes.auth import router as auth_router
+from app.api.routes.users import router as users_router
 
 
 

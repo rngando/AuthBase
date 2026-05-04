@@ -1,6 +1,6 @@
 # app/db/session.py
 
-from core.config import Config
+from app.core.config import Config
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

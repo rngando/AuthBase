@@ -3,10 +3,10 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 
-from api.deps import get_db
-from services.auth_service import AuthService
-from schemas.auth import LoginSchema, RegisterSchema
-from schemas.auth import LoginResponse, RegisterResponse
+from app.api.deps import get_db
+from app.services.auth_service import AuthService
+from app.schemas.auth import LoginSchema, RegisterSchema
+from app.schemas.auth import LoginResponse, RegisterResponse
 
 
 

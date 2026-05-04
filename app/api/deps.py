@@ -1,5 +1,5 @@
 
-from db.session import SessionLocal
+from app.db.session import SessionLocal
 
 def get_db():
     # Cria uma sessão do banco de dados para cada requisição e garante que ela seja fechada após o uso.

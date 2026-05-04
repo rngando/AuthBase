@@ -1,6 +1,6 @@
 # app/repositories/auth_repository.py
 
-from models.user import Users
+from app.models.user import Users
 
 
 class AuthRepository:

@@ -2,7 +2,7 @@
 
 from fastapi import HTTPException
 from werkzeug.security import generate_password_hash
-from repositories.user_repository import UserRepository
+from app.repositories.user_repository import UserRepository
 
 
 class UserService:

@@ -19,6 +19,10 @@ Uma API base para autenticação e gerenciamento de usuários.
 - Segurança com hashing de senhas
 - Validação de dados com Pydantic
 
+## Imagem de Teste
+
+![Imagem de teste](test.png) 
+
 ## Instalação
 
 1. Clone o repositório:
@@ -41,7 +45,7 @@ Uma API base para autenticação e gerenciamento de usuários.
 
 Para iniciar o servidor:
 ```
-python app/main.py
+uvicorn app.main:app 
 ```
 
 A API estará disponível em `http://localhost:8000`.
@@ -58,6 +62,8 @@ Para mais detalhes, consulte a documentação automática em `/docs` ou `/redoc`
 ## Estrutura do Projeto
 
 ```
+README.md
+requirements.txt
 app/
 ├── main.py              # Ponto de entrada da aplicação
 ├── api/
@@ -83,6 +89,10 @@ app/
 └── services/
     ├── auth_service.py  # Serviço de auth
     └── user_service.py  # Serviço de usuários
+
+tests/
+├── conftest.py
+└── test_auth.py
 ```
 
 

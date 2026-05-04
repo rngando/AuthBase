@@ -1,18 +1,13 @@
 # app/api/users.py
 
-from db.base import Base
-from api.deps import get_db
-from models.user import Users
-from core.config import Config
-from services.user_service import UserService
-from core.dependencies import get_current_user
-from schemas.user import UserResponse, UserUpdate
-from repositories.user_repository import UserRepository
+from app.api.deps import get_db
+from app.models.user import Users
+from app.services.user_service import UserService
+from app.core.dependencies import get_current_user
+from app.schemas.user import UserResponse, UserUpdate
 
 from sqlalchemy.orm import Session
-from fastapi.responses import JSONResponse
-from werkzeug.security import generate_password_hash
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 
 
 

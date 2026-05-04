@@ -1,12 +1,12 @@
 # app/core/security.py
 
-from models.user import Users
-from core.config import Config
-from repositories.user_repository import UserRepository
+from app.models.user import Users
+from app.core.config import Config
+from app.repositories.user_repository import UserRepository
 
 import jwt
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, UTC, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -24,7 +24,7 @@ def authenticate_user(db: Session, email: str, password: str):
 
 def create_access_token(user_id: int):
     # Criar o TOKEN de acesso para cada Usuário
-    expiration = datetime.utcnow() + timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
+    expiration = datetime.now(UTC) + timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     payload = {
         "sub": str(user_id),
