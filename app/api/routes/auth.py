@@ -6,12 +6,13 @@ from fastapi import APIRouter, Depends
 from api.deps import get_db
 from services.auth_service import AuthService
 from schemas.auth import LoginSchema, RegisterSchema
+from schemas.auth import LoginResponse, RegisterResponse
 
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/register")
+@router.post("/register", response_model=RegisterResponse, status_code=201)
 def register(data: RegisterSchema, db: Session = Depends(get_db)):
     """
     Registra um novo usuário.
@@ -24,7 +25,7 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
     service = AuthService(db)
     return service.register(data)
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 def login(data: LoginSchema, db: Session = Depends(get_db)):
     """
     Autentica o usuário com email e senha.
