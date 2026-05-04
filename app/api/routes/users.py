@@ -4,8 +4,10 @@ from db.base import Base
 from api.deps import get_db
 from models.user import Users
 from core.config import Config
+from services.user_service import UserService
 from core.dependencies import get_current_user
 from schemas.user import UserResponse, UserUpdate
+from repositories.user_repository import UserRepository
 
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
@@ -16,9 +18,9 @@ from fastapi import APIRouter, HTTPException, Depends
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Listar usuários
+# Só o admin pode listar todos os usuários
 @router.get("/", response_model=list[UserResponse])
-def get_users(db: Session = Depends(get_db), current_user: Users = Depends(get_current_user)):
+def get_users(skip: int=0, limit: int=10, db: Session = Depends(get_db), current_user: Users = Depends(get_current_user)):
     """
     Lista todos os usuários.
 
@@ -29,12 +31,22 @@ def get_users(db: Session = Depends(get_db), current_user: Users = Depends(get_c
 
     Retorna uma lista de usuários.
     """
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not allowed")
+    service = UserService(db)
+    return service.list_users(current_user, skip, limit)
 
-    return db.query(Users).all()
+@router.get("/me", response_model=UserResponse)
+def get_me(db: Session=Depends(get_db), current_user: Users = Depends(get_current_user)):
+    """
+    Retorna os dados do usuário autenticado.
 
-# Buscar usuário por ID
+    - **current_user**: Usuário autenticado.
+
+    Retorna os dados do usuário.
+    """
+    service = UserService(db)
+    return service.get_user(current_user.id, current_user)
+
+# Apenas o admin ou o próprio usuário
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session=Depends(get_db), current_user: Users = Depends(get_current_user)):
     """
@@ -48,18 +60,10 @@ def get_user(user_id: int, db: Session=Depends(get_db), current_user: Users = De
 
     Retorna os dados do usuário.
     """
-    user = db.query(Users).filter(Users.id == user_id).first()
+    service = UserService(db)
+    return service.get_user(user_id, current_user)
 
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # só admin ou o próprio usuário pode ver
-    if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not allowed")
-
-    return user
-
-# Atualizar usuário
+# Apenas o admin ou o próprio usuário pode atualizar
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), current_user: Users = Depends(get_current_user)):
     """
@@ -74,39 +78,10 @@ def update_user(user_id: int, data: UserUpdate, db: Session = Depends(get_db), c
 
     Retorna os dados atualizados do usuário.
     """
-    user = db.query(Users).filter(Users.id == user_id).first()
-    existing = db.query(Users).filter(Users.email == data.email).first()
+    service = UserService(db)
+    return service.update_user(user_id, data, current_user)
 
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if existing and existing.id != user_id:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    # permissão
-    if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not allowed")
-
-    if data.name is not None:
-        user.name = data.name
-    if data.email is not None:
-        user.email = data.email
-    if data.password is not None:
-        user.hashed_password = generate_password_hash(data.password)
-    if data.role and current_user.role != "admin":
-        raise HTTPException(403, "Not allowed to change role")
-    elif data.role:
-        role = ["admin", "user"]
-        if data.role not in role:
-            raise HTTPException(status_code=400, detail="Invalid role")
-        user.role = data.role
-
-    db.commit()
-    db.refresh(user)
-
-    return user
-
-# Deletar usuário
+# Apenas o admin ou o próprio usuário pode deletar
 @router.delete("/{user_id}", response_model=UserResponse)
 def delete_user(user_id: int, db: Session=Depends(get_db), current_user: Users = Depends(get_current_user)):
     """ 
@@ -117,19 +92,5 @@ def delete_user(user_id: int, db: Session=Depends(get_db), current_user: Users =
     - **current_user**: Usuário autenticado.
     Retorna os dados do usuário deletado.
     """
-    user = db.query(Users).filter(Users.id == user_id).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Permissão
-    if current_user.role != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not allowed")
-    
-    # Deletar Usuário
-    db.delete(user)
-    db.commit()
-
-    # return user
-    return JSONResponse(content={"message": "User deleted successfully", "user_id": user_id}, status_code=200)
-
+    service = UserService(db)
+    return service.delete_user(user_id, current_user)

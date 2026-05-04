@@ -22,16 +22,16 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
                 detail="Invalid token"
             )
 
-    except jwt.PyJWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
-        )
-
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired"
+        )
+    
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
         )
 
     user = db.query(Users).filter(Users.id == int(user_id)).first()
@@ -40,6 +40,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found"
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="User is inactive"
         )
 
     return user
